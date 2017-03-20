@@ -48,6 +48,29 @@ abstract class AbstractEntity
     }
 
     /**
+     * @return array
+     */
+    public function toApiArray()
+    {
+        $settings = [];
+        $called = get_called_class();
+
+        $reflection = new \ReflectionClass($called);
+        $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
+
+        foreach ($properties as $property) {
+            $prop = $property->getName();
+            if (isset($this->$prop) && $property->class == $called) {
+                $convert = implode('_', preg_split('/(?=[A-Z])/', $prop));
+
+                $settings[strtolower($convert)] = $this->$prop;
+            }
+        }
+
+        return $settings;
+    }
+
+    /**
      * @param string|null $date DateTime string
      *
      * @return string|null DateTime in ISO8601 format
